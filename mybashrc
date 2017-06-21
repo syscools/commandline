@@ -9,7 +9,7 @@ if (($(echo $BASH_VERSION |cut -d'.' -f2)>=3));then
     E="\e"
     . ~/src/commandline/git-prompt.sh
     #export PS1="\[$E$b\]$p$q[\$?\[$E$c\]|\[$E$b\]\$msgcount\[$E$b\]]$q\[$E$b\][\$(__git_ps1)]$q<\[$E$b\]\h:\[$E$c\]\w\[$E$b\]>\n$r\[$E$b\]"
-    export PS1="\[$E$b\]$p$q[\$?\[$E$c\]|\[$E$b\]\$msgcount\[$E$b\]]$q\[$E$b\][\$(__git_ps1)]$q<\h:\[$E$b\]\[$E$c\]\w\[$E$b\]>\n$r\[$E$b\]"
+    export PS1="\[$E$b\]$p$q[\$?\[$E$c\]|\[$E$b\]\$msgcount\[$E$b\]]$q\[$E$b\][\$(__git_ps1)]$q<t450:\[$E$b\]\[$E$c\]\w\[$E$b\]>\n$r\[$E$b\]"
 else
     export HISTFILESIZE=400000000
     export HISTSIZE=10000
@@ -48,3 +48,34 @@ alias od='od -w32 --endian=big -t x1z'
 #    fi
 #fi
 
+##### my tmux stuff
+tbuftsdir=~/buffer/$(date +%Y-%m-%d)
+[ ! -d $tbuftsdir ] && mkdir -p $tbuftsdir
+
+tsave() {
+    dir=${1:-$tbuftsdir}
+    [ ! -d $dir ] && mkdir -p $dir
+    for buf_name in `tmux list-buffers | sed -e 's/\(buffer[0-9]*\).*/\1/'`;do 
+        printf "."
+        tmux save-buffer -b $buf_name $dir/"$buf_name.txt";
+    done
+    echo
+}
+
+tload() {
+    dir=${1:-$tbuftsdir}
+    if [ ! -d $dir ];then 
+        mkdir -p $dir
+        return
+    fi
+    if [ "$(ls -A $dir)" ];then
+        for f in $dir/*;do 
+            a=$(basename $f)
+            b=${a%.*}
+            printf "."
+            tmux load-buffer -b $b $f
+        done
+        echo 
+    fi
+}
+#####
